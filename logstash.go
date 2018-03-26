@@ -2,6 +2,7 @@ package logrustash
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net"
 	"strings"
@@ -259,7 +260,12 @@ func (h *Hook) performSend(data []byte, sendRetries int) error {
 	h.Unlock()
 
 	if err != nil && h.Debug {
-		fmt.Printf("Error sending data to logstash. Reason: %s\n", err.Error())
+		fmt.Printf("Error sending data to logstash (size: %d). Reason: %s\n", len(data), err.Error())
+
+		file := fmt.Sprintf("/tmp/logrustash-%d.tmp", time.Now().UnixNano())
+		ioutil.WriteFile(file, data, 0644)
+
+		fmt.Printf("Wrote message content to %s\n", file)
 	}
 
 	if err != nil {
